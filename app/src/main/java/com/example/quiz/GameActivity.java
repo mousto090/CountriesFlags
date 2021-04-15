@@ -156,7 +156,9 @@ class Game {
     private Context mContext;
     private List<Country> countries;
     private List<Integer> indexes;
+    private final int BASE_SCORE = 3;
     private int score;
+    private int attempt;
 
     Game(Context context) {
         this.mContext = context;
@@ -203,14 +205,24 @@ class Game {
         this.score = score;
     }
 
+    public void setAttempt(int attempt) {
+        this.attempt = attempt;
+    }
+
+    public int getAttempt() {
+        return attempt;
+    }
+
     public void wrongAnswer() {
         if (this.score > 0) {
-            this.setScore(this.score - 3);
+            this.setScore(this.score - 1);
         }
+        this.setAttempt(++attempt);
     }
 
     public void correctAnswer() {
-        this.setScore(this.score + 3);
+        this.setScore(score + BASE_SCORE - attempt);
+        this.setAttempt(0);
     }
 }
 
