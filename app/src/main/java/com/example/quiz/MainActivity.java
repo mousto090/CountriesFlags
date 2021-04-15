@@ -26,6 +26,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         initViews();
         mButtonJouer.setOnClickListener(View -> {
+            //lance l'acitity Game
             startActivity(new Intent(this, GameActivity.class));
         });
     }

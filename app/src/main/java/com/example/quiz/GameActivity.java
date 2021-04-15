@@ -59,6 +59,9 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
         });
     }
 
+    /**
+     * Initialise les buttons, l'image view et le text view
+     */
     private void initViews() {
         mButtonChoix1 = findViewById(R.id.btn_choix1);
         mButtonChoix2 = findViewById(R.id.btn_choix2);
@@ -83,17 +86,29 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
         Utils.fetchSvg(this, response.getFlag(), mImageView);
     }
 
+    /**
+     * Nouvelle question
+     */
     public void newPartie() {
         mGame.newQuestion();
         updateUI();
     }
 
+    /**
+     * Met à jour le textview du score
+     */
     public void updateScoreView() {
         String score = "Score : " + mGame.getScore();
         mTextViewScore.setText(score);
     }
 
 
+    /**
+     * Listener de tous des boutons, chaque bouton est associé à un pays,
+     * cette associations est faite ent utilsant button.setTag dans la méthode
+     * updateUI (button.setTag(question))
+     * @param v
+     */
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
@@ -102,7 +117,7 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
             case R.id.btn_choix3:
             case R.id.btn_choix4:
                 Country country = (Country) v.getTag();
-                Log.d("TAG", "" + country.getName() + mGame.getPartie().getResponse().getName());
+
                 if (country.getName().equals(mGame.getPartie().getResponse().getName())) {
                     Toast.makeText(this, "Congrats !!", Toast.LENGTH_SHORT).show();
                     mGame.correctAnswer();
@@ -160,6 +175,10 @@ class Game {
     private int score;
     private int attempt;
 
+    /**
+     * Constructeur Game et initialise le jeu
+     * @param context
+     */
     Game(Context context) {
         this.mContext = context;
         this.countries = loadCountries();
@@ -170,6 +189,11 @@ class Game {
 
     private Partie partie;
 
+    /**
+     * Lit le fichier json en appelant la méthode définie dans la classe Utils et
+     * mape chaque pays à un objet Country
+     * @return
+     */
     private List<Country> loadCountries() {
         Optional<String> jsonFileString = Utils.getJsonFromAssets(mContext, "countries.json");
         Gson gson = new Gson();
@@ -178,7 +202,11 @@ class Game {
         return gson.fromJson(jsonFileString.orElse(""), listCountryType);
     }
 
-
+    /**
+     * Genère une nouvelle questions en melangeant (shuffle) à chaque fois
+     * les indexes des pays stocké dans `indexes` et la réponse associée.
+     * @return
+     */
     public Partie newQuestion() {
         Collections.shuffle(indexes);
         List<Country> questions = indexes.stream().limit(4).map(index -> countries.get(index)).collect(Collectors.toList());
@@ -262,17 +290,13 @@ class Partie {
 
 class Utils {
 
-    public String inputStreamToString(InputStream inputStream) {
-        try {
-            byte[] bytes = new byte[inputStream.available()];
-            inputStream.read(bytes, 0, bytes.length);
-            String json = new String(bytes);
-            return json;
-        } catch (IOException e) {
-            return null;
-        }
-    }
-
+    /**
+     * Recupère le contenu du fichier json
+     * qu'on va parser par la suite en utilisant la librairie Gson
+     * @param context
+     * @param fileName
+     * @return
+     */
     static Optional<String> getJsonFromAssets(Context context, String fileName) {
         String jsonString = null;
         try {
