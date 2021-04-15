@@ -6,6 +6,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -41,6 +42,7 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
     private Button mButtonChoix2;
     private Button mButtonChoix3;
     private Button mButtonChoix4;
+    private TextView mTextViewScore;
     private ImageView mImageView;
     private Game mGame;
 
@@ -63,6 +65,7 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
         mButtonChoix3 = findViewById(R.id.btn_choix3);
         mButtonChoix4 = findViewById(R.id.btn_choix4);
         mImageView = findViewById(R.id.image_flag);
+        mTextViewScore = findViewById(R.id.textViewScore);
     }
 
     private void updateUI() {
@@ -77,14 +80,17 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
             button.setTag(question);
             integer.getAndIncrement();
         });
-
-        Log.d(TAG, "updateUI: " + response.getFlag());
         Utils.fetchSvg(this, response.getFlag(), mImageView);
     }
 
     public void newPartie() {
         mGame.newQuestion();
         updateUI();
+    }
+
+    public void updateScoreView() {
+        String score = "Score : " + mGame.getScore();
+        mTextViewScore.setText(score);
     }
 
 
@@ -97,12 +103,15 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
             case R.id.btn_choix4:
                 Country country = (Country) v.getTag();
                 Log.d("TAG", "" + country.getName() + mGame.getPartie().getResponse().getName());
-                if (country.getName() == mGame.getPartie().getResponse().getName()) {
+                if (country.getName().equals(mGame.getPartie().getResponse().getName())) {
                     Toast.makeText(this, "Congrats !!", Toast.LENGTH_SHORT).show();
+                    mGame.correctAnswer();
                     newPartie();
                 } else {
+                    mGame.wrongAnswer();
                     Toast.makeText(this, "Wrong answer ", Toast.LENGTH_SHORT).show();
                 }
+                updateScoreView();
                 break;
         }
     }
@@ -147,11 +156,13 @@ class Game {
     private Context mContext;
     private List<Country> countries;
     private List<Integer> indexes;
+    private int score;
 
     Game(Context context) {
         this.mContext = context;
         this.countries = loadCountries();
         this.indexes = IntStream.range(0, this.countries.size() - 1).boxed().collect(Collectors.toList());
+        this.score = 0;
         newQuestion();
     }
 
@@ -182,6 +193,24 @@ class Game {
 
     public Partie getPartie() {
         return partie;
+    }
+
+    public int getScore() {
+        return score;
+    }
+
+    public void setScore(int score) {
+        this.score = score;
+    }
+
+    public void wrongAnswer() {
+        if (this.score > 0) {
+            this.setScore(this.score - 3);
+        }
+    }
+
+    public void correctAnswer() {
+        this.setScore(this.score + 3);
     }
 }
 
